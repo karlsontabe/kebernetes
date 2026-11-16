@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secured-pod
+  namespace: selim
+spec:
+  automountServiceAccountToken: false
+  serviceAccountName: sa-reader
+  containers:
+  - name: worker
+    image: curlimages/curl:latest
+    command: ["sleep", "3600"]
+    resources:
+      requests:
+        cpu: "50m"
+        memory: "64Mi"
+      limits:
+        cpu: "100m"
+        memory: "128Mi"
