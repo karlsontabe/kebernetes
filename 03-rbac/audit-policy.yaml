@@ -1,0 +1,30 @@
+apiVersion: audit.k8s.io/v1
+kind: Policy
+omitStages:
+  - "RequestReceived"
+rules:
+  # Journaliser les modifications critiques sur les ressources sensibles au niveau RequestResponse
+  - level: RequestResponse
+    resources:
+    - group: ""
+      resources: ["secrets", "configmaps", "serviceaccounts"]
+    - group: "rbac.authorization.k8s.io"
+      resources: ["roles", "rolebindings", "clusterroles", "clusterrolebindings"]
+    - group: "certificates.k8s.io"
+      resources: ["certificatesigningrequests"]
+
+  # Journaliser les métadonnées pour les opérations sur les pods et déploiements
+  - level: Metadata
+    resources:
+    - group: ""
+      resources: ["pods", "pods/exec", "pods/attach", "namespaces"]
+    - group: "apps"
+      resources: ["deployments", "daemonsets", "statefulsets"]
+
+  # Ne pas journaliser les requêtes de lecture courantes ou internes pour éviter de saturer les disques
+  - level: None
+    users: ["system:kube-proxy", "system:kube-scheduler", "system:kube-controller-manager"]
+    verbs: ["watch", "list", "get"]
+
+  # Niveau par défaut : enregistrer les métadonnées pour le reste des requêtes
+  - level: Metadata
